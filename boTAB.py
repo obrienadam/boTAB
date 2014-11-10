@@ -49,7 +49,7 @@ def main():
                             18.27e-6,          # viscosity
                             Vector(200., 0.))  # velocity
         
-    droplet = Droplet(0.001,           # radius
+    droplet = Droplet(0.0005,           # radius
                       998.,             # density
                       8.94e-4,          # viscosity
                       0.07262,          # surface tension coefficient
@@ -59,7 +59,7 @@ def main():
     # Define simulation parameters
                       
     maxTime = 1.
-    nTimeSteps = 1800
+    nTimeSteps = 5000
     dt = maxTime/nTimeSteps
     t = 0.
     nBreakups = 0
@@ -120,8 +120,11 @@ def main():
                       0.07262,                 # surface tension coefficient
                       droplet.position,        # position
                       droplet.velocity + vn)   # velocity
+
+            nBreakups += 1
             
             print "\nThe droplet has broken!"
+            print "time =", str(t), "s"
             print droplet
             
         t += dt
@@ -129,7 +132,9 @@ def main():
         outFile.write("%s, %s, %s, %s\n"%(str(t), str(droplet.radius), \
         droplet.position, droplet.velocity))
     
-    print "\nThe final droplet:"        
+    print "\nThe final droplet:"
+    print "time =", str(t), "s"
+    print "number of breakups:", str(nBreakups)
     print droplet
 
 # Execute the main function   
