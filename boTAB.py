@@ -12,7 +12,7 @@ Author: Adam O'Brien
 
 """
 
-from math import exp, cos, sin
+from math import exp, cos, sin, sqrt
 from fluid import Freestream, Droplet, Vector
 
 # Returns the axis distortion y^n+1
@@ -20,14 +20,14 @@ from fluid import Freestream, Droplet, Vector
 def computeY(Wec, dt, td, t, omega, yn, dydtn):
     
     return Wec + exp(-dt/td)*((yn - Wec)*cos(omega*t) + 1/omega*(dydtn + \
-            (yn - Wec)/td)*sin(omega*t))
+    (yn - Wec)/td)*sin(omega*t))
             
 # Returns the time rate of change of axis distortion (dy/dt)^n+1     
             
 def computeDyDt(Wec, dt, td, t, omega, yn1, yn, dydtn):
     
     return (Wec - yn1)/td + omega*exp(-dt/td)*(1/omega*(dydtn + (yn - Wec)/td)* \
-            cos(omega*dt) - (yn - Wec)*sin(omega*dt))
+    cos(omega*t) - (yn - Wec)*sin(omega*t))
 
 def main():
     
@@ -39,12 +39,12 @@ def main():
     Cf = 1/3.
     K = 10/3.
     Cv = 1.
-    
+                      
     freestream = Freestream(1.205,             # density
                             18.27e-6,          # viscosity
                             Vector(200., 0.))  # velocity
         
-    droplet = Droplet(0.0005,           # radius
+    droplet = Droplet(0.001,           # radius
                       998.,             # density
                       8.94e-4,          # viscosity
                       0.07262,          # surface tension coefficient
@@ -53,8 +53,8 @@ def main():
                       
     # Define simulation parameters
                       
-    maxTime = 0.1
-    nTimeSteps = 1000
+    maxTime = 1.
+    nTimeSteps = 1800
     dt = maxTime/nTimeSteps
     nBreakups = 0
     
@@ -62,64 +62,58 @@ def main():
     
     for stepNo in range(1, nTimeSteps + 1):
         
+        # Advect the droplet
+        
+        droplet.advect(freestream, Cf, dt)
+        
         # Compute relevant droplet oscillation parameters
     
-        We = droplet.weberNo(freestream)
-        Wec = droplet.weberNoCrit(freestream, Cf, Ck, Cb)       
+        Wec = droplet.weberNoCrit(freestream, Cf, Ck, Cb)
         td = droplet.td(Cd)
         omega = droplet.omega(Cd, Ck)
         
-        # Compute the droplet distortion       
+        # Compute undamped oscillation, check if breakup is possible
         
-        yn = droplet.y
-        droplet.y = computeY(Wec, dt, td, droplet.t, omega, droplet.y, \
-        droplet.dydt)
-        droplet.dydt = computeDyDt(Wec, dt, td, droplet.t, omega, droplet.dydt, \
-        yn, droplet.dydt)
+        A = sqrt((droplet.y - Wec)**2 + ((droplet.dydt)/omega)**2)
+        
+        if Wec + A > 1:
+            
+            pass
+            
+        # Update droplet distortion
+            
+        yn = droplet.y            
+            
+        droplet.y = computeY(Wec, dt, td, droplet.t, omega, droplet.y, droplet.dydt)
+        
+        droplet.dydt = computeDyDt(Wec, dt, td, droplet.t, omega, droplet.y, yn, droplet.dydt)
         
         #print droplet.y
         
-        # Advect the droplet
-        
-        
-        
-        
-        
-        droplet.advect(freestream, Cb, dt)
-        
-        # Check for breakup. Create a new droplet in the event of breakup
+        # Break the drop if necessary
         
         if droplet.checkBreakup():
             
-            # Compute the Sauter Mean Radius (SMR) of the new droplet
-            # distribution. For now, only one droplet is tracked            
-            """
             r32 = droplet.radius/(1. + 8.*K*droplet.y**2/20. + \
-            droplet.rho*droplet.radius**3*droplet.dydt**2/droplet.sigma* \
-            (6.*K - 5.)/120.)
-            """
-            r32 = droplet.radius/2
-            # Compute the velocity of the new child droplet. Assume it just
-            # travels normal to the path of the parent droplet
-
-            v = droplet.velocity
-
-
-            # Create new droplet
+            droplet.rho*droplet.radius**3*droplet.dydt**2/droplet.sigma*(6.*K - \
+            5.)/120.)
             
-            droplet = Droplet(r32,   # radius
-                      998.,             # density
-                      8.94e-4,          # viscosity
-                      0.07262,          # surface tension coefficient
-                      droplet.position,   # position
-                      v)   # velocity
-                      
-            nBreakups += 1
-                      
+            vn = droplet.velocity.unitVector().unitVector().scale(Cv*Cb*droplet.radius*droplet.dydt)
+            
+            droplet = Droplet(r32,             # radius
+                      998.,                    # density
+                      8.94e-4,                 # viscosity
+                      0.07262,                 # surface tension coefficient
+                      droplet.position,        # position
+                      droplet.velocity + vn)   # velocity
+            
+            print "The droplet has broken!"
             print droplet
-        
     
-# Execute the main function    
+    print "\nThe final droplet:"        
+    print droplet
+
+# Execute the main function   
     
 if __name__ == "__main__":
     main()
