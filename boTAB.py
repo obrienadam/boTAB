@@ -30,6 +30,11 @@ def computeDyDt(Wec, dt, td, t, omega, yn1, yn, dydtn):
     cos(omega*t) - (yn - Wec)*sin(omega*t))
 
 def main():
+
+    print ""
+    print "boTAB |"
+    print "-------"
+    print "        Compute the break-up of a drop in a uniform flow"
     
     # Define the empirical constants
     
@@ -56,7 +61,13 @@ def main():
     maxTime = 1.
     nTimeSteps = 1800
     dt = maxTime/nTimeSteps
+    t = 0.
     nBreakups = 0
+    
+    # Open a file
+    
+    outFile = open("dropBreakup.txt", "w")
+    outFile.write("time, droplet_radius, position, velocity\n")
     
     # Begin the simulation
     
@@ -94,11 +105,14 @@ def main():
         
         if droplet.checkBreakup():
             
+            # Compute the Sauter Mean Radius (SMR) and use this as the new droplet radius.
+            # Since only one droplet needs to be tracked, the others are just ignored
+            
             r32 = droplet.radius/(1. + 8.*K*droplet.y**2/20. + \
             droplet.rho*droplet.radius**3*droplet.dydt**2/droplet.sigma*(6.*K - \
             5.)/120.)
             
-            vn = droplet.velocity.unitVector().unitVector().scale(Cv*Cb*droplet.radius*droplet.dydt)
+            vn = droplet.velocity.unitVector().normalVector().scale(Cv*Cb*droplet.radius*droplet.dydt)
             
             droplet = Droplet(r32,             # radius
                       998.,                    # density
@@ -107,8 +121,13 @@ def main():
                       droplet.position,        # position
                       droplet.velocity + vn)   # velocity
             
-            print "The droplet has broken!"
+            print "\nThe droplet has broken!"
             print droplet
+            
+        t += dt
+            
+        outFile.write("%s, %s, %s, %s\n"%(str(t), str(droplet.radius), \
+        droplet.position, droplet.velocity))
     
     print "\nThe final droplet:"        
     print droplet
