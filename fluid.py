@@ -25,7 +25,7 @@ class Vector(object):
         
     def __repr__(self):
         
-        return "(%s, %s)"%(self.x, self.y)
+        return "%s, %s"%(self.x, self.y)
         
     def __add__(self, other):
         

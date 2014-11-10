@@ -1,3 +1,6 @@
 .spyderproject
 *.pyc
 *.txt
+*.lay
+*.sty
+*.phy

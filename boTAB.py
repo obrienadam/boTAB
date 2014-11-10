@@ -86,10 +86,17 @@ def main():
         # Compute undamped oscillation, check if breakup is possible
         
         A = sqrt((droplet.y - Wec)**2 + ((droplet.dydt)/omega)**2)
+
+        # Check the undamped oscillation amplitude. If this condition
+        # is not met, break-up is not possible
         
-        if Wec + A > 1:
+        if Wec + A > 1.:
             
-            pass
+            breakupPossible = True
+
+        else:
+
+            breakupPossible = False
             
         # Update droplet distortion
             
@@ -99,11 +106,9 @@ def main():
         
         droplet.dydt = computeDyDt(Wec, dt, td, droplet.t, omega, droplet.y, yn, droplet.dydt)
         
-        #print droplet.y
-        
         # Break the drop if necessary
         
-        if droplet.checkBreakup():
+        if droplet.checkBreakup() and breakupPossible:
             
             # Compute the Sauter Mean Radius (SMR) and use this as the new droplet radius.
             # Since only one droplet needs to be tracked, the others are just ignored
@@ -111,15 +116,17 @@ def main():
             r32 = droplet.radius/(1. + 8.*K*droplet.y**2/20. + \
             droplet.rho*droplet.radius**3*droplet.dydt**2/droplet.sigma*(6.*K - \
             5.)/120.)
+
+            # Compute the normal component of the velocity
             
             vn = droplet.velocity.unitVector().normalVector().scale(Cv*Cb*droplet.radius*droplet.dydt)
             
-            droplet = Droplet(r32,             # radius
+            droplet = Droplet(r32,             # new radius
                       998.,                    # density
                       8.94e-4,                 # viscosity
                       0.07262,                 # surface tension coefficient
                       droplet.position,        # position
-                      droplet.velocity + vn)   # velocity
+                      droplet.velocity + vn)   # new velocity
 
             nBreakups += 1
             
