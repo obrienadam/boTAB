@@ -11,7 +11,7 @@ This solver uses the popular TAB model to simulate the atomization of droplets
 Author: Adam O'Brien
 
 """
-
+from input import readInputFile
 from math import exp, cos, sin, sqrt
 from fluid import Freestream, Droplet, Vector
 
@@ -34,32 +34,41 @@ def main():
     print ""
     print "boTAB |"
     print "-------"
-    print "        Compute the break-up of a drop in a uniform flow"
+    print "        Compute the break-up of a drop in a uniform flow", "\n"
     
-    # Define the empirical constants
+    # Open up a configuration file
     
-    Cb = 0.5
-    Ck = 8.
-    Cd = 5.
-    Cf = 1/3.
-    K = 10/3.
-    Cv = 1.
+    userInput = readInputFile()
+    
+    # Set-up the constants in accordance with the input
+    
+    Cb = userInput["Cb"]
+    Ck = userInput["Ck"]
+    Cd = userInput["Ck"]
+    Cf = userInput["Cf"]
+    K = userInput["K"]
+    Cv = userInput["Cv"]
+    
+    # Set-up the freestream and droplet in accordance with the input
                       
-    freestream = Freestream(1.205,             # density
-                            18.27e-6,          # viscosity
-                            Vector(200., 0.))  # velocity
+    freestream = Freestream(userInput["freestreamRho"],       # density
+                            userInput["freestreamMu"],        # viscosity
+                            userInput["freestreamVelocity"])  # velocity
         
-    droplet = Droplet(0.0005,           # radius
-                      998.,             # density
-                      8.94e-4,          # viscosity
-                      0.07262,          # surface tension coefficient
-                      Vector(0., 0.),   # position
-                      Vector(0., 0.))   # velocity
+    droplet = Droplet(userInput["radius"],           # radius
+                      userInput["dropletRho"],       # density
+                      userInput["dropletMu"],        # viscosity
+                      userInput["sigma"],            # surface tension coefficient
+                      userInput["dropletPosition"],  # position
+                      userInput["dropletVelocity"])  # velocity
                       
-    # Define simulation parameters
+    # Set-up the simulation parameters in accordance with the input
                       
-    maxTime = 1.
-    nTimeSteps = 5000
+    maxTime = userInput["maxTime"]
+    nTimeSteps = userInput["nTimeSteps"]
+    
+    # Initialize misc parameters    
+    
     dt = maxTime/nTimeSteps
     t = 0.
     nBreakups = 0
