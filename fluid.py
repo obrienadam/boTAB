@@ -60,20 +60,24 @@ def dot(u, v):
 
 class Freestream(object):
     
-    def __init__(self, rho, mu, velocity):
+    def __init__(self, rho, mu, temperature, velocity):
         self.rho = rho
         self.mu = mu
+        self.temperature = temperature
         self.velocity = velocity
     
 # Droplet class for representing droplets    
     
 class Droplet(object):
     
-    def __init__(self, radius, rho, mu, sigma, position, velocity):
+    def __init__(self, radius, rho, mu, sigma, boilingTemp, latentHeat, specificHeat, position, velocity):
         self.radius = radius
         self.rho = rho
         self.mu = mu
         self.sigma = sigma
+        self.boilingTemp = boilingTemp
+        self.latentHeat = latentHeat
+        self.specificHeat = specificHeat
         self.position = position
         self.velocity = velocity
         self.mass = 4.*pi*self.rho*self.radius**3/3

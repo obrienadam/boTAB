@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 
 """
+
+boTAB
+=====
+
 This module is for simple file input and configuration
 
 Author: Adam O'Brien

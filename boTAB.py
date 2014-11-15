@@ -14,6 +14,7 @@ Author: Adam O'Brien
 from input import *
 from math import exp, cos, sin, sqrt
 from fluid import *
+from evaporation import *
 from matplotlib.pyplot import *
 
 # Returns the axis distortion y^n+1
@@ -54,12 +55,16 @@ def main():
                       
     freestream = Freestream(userInput["freestreamRho"],       # density
                             userInput["freestreamMu"],        # viscosity
+                            userInput["temperature"],         # temperature
                             userInput["freestreamVelocity"])  # velocity
         
     droplet = Droplet(userInput["radius"],           # radius
                       userInput["dropletRho"],       # density
                       userInput["dropletMu"],        # viscosity
                       userInput["sigma"],            # surface tension coefficient
+                      userInput["boilingTemp"],      # boiling temperature   
+                      userInput["latentHeat"],       # latent heat of evaporation
+                      userInput["specificHeat"],     # specific heat
                       userInput["dropletPosition"],  # position
                       userInput["dropletVelocity"])  # velocity
                       
@@ -119,6 +124,10 @@ def main():
         
         droplet.dydt = computeDyDt(Wec, dt, td, droplet.t, omega, droplet.y, yn, droplet.dydt)
         
+        # Compute the droplet evaporation
+
+        evaporate(freestream, droplet, dt)
+        
         # Break the drop if necessary
         
         if droplet.checkBreakup() and breakupPossible:
@@ -134,12 +143,15 @@ def main():
             
             vn = droplet.velocity.unitVector().normalVector().scale(Cv*Cb*droplet.radius*droplet.dydt)
             
-            droplet = Droplet(r32,             # new radius
-                      userInput["dropletRho"], # density
-                      userInput["dropletMu"],  # viscosity
-                      userInput["sigma"],      # surface tension coefficient
-                      droplet.position,        # position
-                      droplet.velocity + vn)   # new velocity
+            droplet = Droplet(r32,               # new radius
+                      droplet.rho,               # density
+                      droplet.mu,                # viscosity
+                      droplet.sigma,             # surface tension coefficient
+                      droplet.boilingTemp,       # boiling temperature
+                      droplet.latentHeat,        # latent heat of evaporation
+                      droplet.specificHeat,      # specific heat capacity
+                      droplet.position,          # position
+                      droplet.velocity + vn)     # new velocity
 
             nBreakups += 1
             
