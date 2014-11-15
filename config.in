@@ -22,7 +22,6 @@ dropletPosition = 0., 0.
 dropletVelocity = 0., 0.
 
 # Simulation parameters
-
-maxTime = 1.
+maxTime = 0.1
 nTimeSteps = 5000
 

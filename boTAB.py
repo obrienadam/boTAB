@@ -11,9 +11,10 @@ This solver uses the popular TAB model to simulate the atomization of droplets
 Author: Adam O'Brien
 
 """
-from input import readInputFile
+from input import *
 from math import exp, cos, sin, sqrt
-from fluid import Freestream, Droplet, Vector
+from fluid import *
+from matplotlib.pyplot import *
 
 # Returns the axis distortion y^n+1
 
@@ -70,7 +71,8 @@ def main():
     # Initialize misc parameters    
     
     dt = maxTime/nTimeSteps
-    t = 0.
+    t = [0.]
+    smr = [droplet.radius]
     nBreakups = 0
     
     # Open a file
@@ -79,6 +81,8 @@ def main():
     outFile.write("time, droplet_radius, position, velocity\n")
     
     # Begin the simulation
+
+    print "\nBeginning time-stepping..."
     
     for stepNo in range(1, nTimeSteps + 1):
         
@@ -131,27 +135,38 @@ def main():
             vn = droplet.velocity.unitVector().normalVector().scale(Cv*Cb*droplet.radius*droplet.dydt)
             
             droplet = Droplet(r32,             # new radius
-                      998.,                    # density
-                      8.94e-4,                 # viscosity
-                      0.07262,                 # surface tension coefficient
+                      userInput["dropletRho"], # density
+                      userInput["dropletMu"],  # viscosity
+                      userInput["sigma"],      # surface tension coefficient
                       droplet.position,        # position
                       droplet.velocity + vn)   # new velocity
 
             nBreakups += 1
             
             print "\nThe droplet has broken!"
-            print "time =", str(t), "s"
+            print "time =", str(t[-1]), "s"
             print droplet
             
-        t += dt
+        t.append(t[-1] + dt)
+        smr.append(droplet.radius)
             
-        outFile.write("%s, %s, %s, %s\n"%(str(t), str(droplet.radius), \
+        outFile.write("%s, %s, %s, %s\n"%(str(t[-1]), str(droplet.radius), \
         droplet.position, droplet.velocity))
+
+    print "\nTime-stepping complete."
     
     print "\nThe final droplet:"
-    print "time =", str(t), "s"
+    print "time =", str(t[-1]), "s"
     print "number of breakups:", str(nBreakups)
     print droplet
+
+    plot(t, smr, linewidth=2.0)
+    axis([0., t[-1], 0., 1.1*userInput["radius"]])
+    title('Droplet Sauter Mean Radius History')
+    xlabel('Time (s)')
+    ylabel('Sauter Mean Radius (SMR) (m)')
+    grid(True)
+    show()
 
 # Execute the main function   
     
