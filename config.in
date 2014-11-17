@@ -12,6 +12,7 @@ Cv = 1.
 freestreamRho = 1.205
 freestreamMu = 18.27e-6
 temperature = 298.
+freestreamK = 0.024
 freestreamVelocity = 200., 0.
 
 # Droplet
@@ -22,6 +23,7 @@ sigma = 0.07262
 boilingTemp = 373.
 latentHeat = 334.
 specificHeat = 4.183
+dropletK = 0.58
 dropletPosition = 0., 0.
 dropletVelocity = 0., 0.
 
