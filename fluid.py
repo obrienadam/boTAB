@@ -82,8 +82,9 @@ class Droplet(object):
         self.k = k
         self.position = position
         self.velocity = velocity
-        self.mass = 4.*pi*self.rho*self.radius**3/3
+        self.mass = self.rho*(4./3.)*pi*self.radius**3
         self.area = pi*self.radius**2
+        self.volume = self.mass/self.rho
         self.y = 0.
         self.dydt = 0.
         self.t = 0.
@@ -131,3 +132,16 @@ class Droplet(object):
             return True
         else:
             return False
+            
+    def printAll(self):
+        
+        print "Radius:", self.radius
+        print "Rho:", self.rho
+        print "mu:", self.mu
+        print "sigma:", self.sigma
+        print "Boiling Temp:", self.boilingTemp
+        print "Latent Heat:", self.latentHeat
+        print "Specific Heat:", self.specificHeat
+        print "k:", self.k
+        print "Position:", self.position
+        print "Velocity:", self.velocity

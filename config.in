@@ -25,7 +25,8 @@ latentHeat = 334.
 specificHeat = 4.183
 dropletK = 0.58
 dropletPosition = 0., 0.
-dropletVelocity = 0., 0.
+dropletVelocity = 0., 20.
+nDroplets = 10
 
 # Simulation parameters
 maxTime = 0.1

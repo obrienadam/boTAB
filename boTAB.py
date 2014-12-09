@@ -51,13 +51,15 @@ def main():
     K = userInput["K"]
     Cv = userInput["Cv"]
 
-    # Set-up the freestream and droplet in accordance with the input
+    # Set-up the freestream
 
     freestream = Freestream(userInput["freestreamRho"],       # density
                             userInput["freestreamMu"],        # viscosity
                             userInput["temperature"],         # temperature
                             userInput["freestreamK"],         # thermal conductivity
                             userInput["freestreamVelocity"])  # velocity
+                            
+    # Set-up droplet initial conditions
 
     droplet = Droplet(userInput["radius"],           # radius
                       userInput["dropletRho"],       # density
@@ -74,6 +76,11 @@ def main():
 
     maxTime = userInput["maxTime"]
     nTimeSteps = userInput["nTimeSteps"]
+    nDroplets = userInput["nDroplets"]
+    
+    # Initialize a droplet list
+    
+    droplets = [droplet]*nDroplets
 
     # Initialize misc parameters
 
@@ -93,80 +100,7 @@ def main():
 
     for stepNo in range(1, nTimeSteps + 1):
 
-        # Advect the droplet
-
-        droplet.advect(freestream, Cf, dt)
-
-        # Compute relevant droplet oscillation parameters
-
-        Wec = droplet.weberNoCrit(freestream, Cf, Ck, Cb)
-        td = droplet.td(Cd)
-        omega = droplet.omega(Cd, Ck)
-
-        # Compute undamped oscillation, check if breakup is possible
-
-        A = sqrt((droplet.y - Wec)**2 + ((droplet.dydt)/omega)**2)
-
-        # Check the undamped oscillation amplitude. If this condition
-        # is not met, break-up is not possible
-
-        if Wec + A > 1.:
-
-            breakupPossible = True
-
-        else:
-
-            breakupPossible = False
-
-        # Update droplet distortion
-
-        yn = droplet.y
-
-        droplet.y = computeY(Wec, dt, td, droplet.t, omega, droplet.y, droplet.dydt)
-
-        droplet.dydt = computeDyDt(Wec, dt, td, droplet.t, omega, droplet.y, yn, droplet.dydt)
-
-        # Compute the droplet evaporation
-
-        evaporate(freestream, droplet, dt)
-
-        # Break the drop if necessary
-
-        if droplet.checkBreakup() and breakupPossible:
-
-            # Compute the Sauter Mean Radius (SMR) and use this as the new droplet radius.
-            # Since only one droplet needs to be tracked, the others are just ignored
-
-            r32 = droplet.radius/(1. + 8.*K*droplet.y**2/20. + \
-            droplet.rho*droplet.radius**3*droplet.dydt**2/droplet.sigma*(6.*K - \
-            5.)/120.)
-
-            # Compute the normal component of the velocity
-
-            vn = droplet.velocity.unitVector().normalVector().scale(Cv*Cb*droplet.radius*droplet.dydt)
-
-            droplet = Droplet(r32,               # new radius
-                      droplet.rho,               # density
-                      droplet.mu,                # viscosity
-                      droplet.sigma,             # surface tension coefficient
-                      droplet.boilingTemp,       # boiling temperature
-                      droplet.latentHeat,        # latent heat of evaporation
-                      droplet.specificHeat,      # specific heat capacity
-                      droplet.k,                 # thermal conductivity
-                      droplet.position,          # position
-                      droplet.velocity + vn)     # new velocity
-
-            nBreakups += 1
-
-            print "\nThe droplet has broken!"
-            print "time =", str(t[-1]), "s"
-            print droplet
-
-        t.append(t[-1] + dt)
-        smr.append(droplet.radius)
-
-        outFile.write("%s, %s, %s, %s\n"%(str(t[-1]), str(droplet.radius), \
-        droplet.position, droplet.velocity))
+        pass
 
     outFile.close()
 
