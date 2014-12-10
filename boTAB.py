@@ -15,7 +15,8 @@ from input import *
 from math import exp, cos, sin, sqrt
 from fluid import *
 from evaporation import *
-from matplotlib.pyplot import *
+from output import *
+import copy as cp
 
 # Returns the axis distortion y^n+1
 
@@ -57,11 +58,11 @@ def main():
                             userInput["freestreamMu"],        # viscosity
                             userInput["temperature"],         # temperature
                             userInput["freestreamK"],         # thermal conductivity
-                            userInput["freestreamVelocity"])  # velocity
-                            
+                            userInput["freestreamVelocity"],  # velocity
+                            userInput["freestreamGravity"])   # gravity
     # Set-up droplet initial conditions
 
-    droplet = Droplet(userInput["radius"],           # radius
+    initialDroplet = Droplet(userInput["radius"],    # radius
                       userInput["dropletRho"],       # density
                       userInput["dropletMu"],        # viscosity
                       userInput["sigma"],            # surface tension coefficient
@@ -72,21 +73,26 @@ def main():
                       userInput["dropletPosition"],  # position
                       userInput["dropletVelocity"])  # velocity
 
+    # Set-up the droplet inlet
+
+    dropletInlet = DropletInlet(userInput["newDropletFrequency"],
+                                userInput["inletWidth"],
+                                userInput["velocityDeviation"])
+
     # Set-up the simulation parameters in accordance with the input
 
     maxTime = userInput["maxTime"]
     nTimeSteps = userInput["nTimeSteps"]
-    nDroplets = userInput["nDroplets"]
-    
-    # Initialize a droplet list
-    
-    droplets = [droplet]*nDroplets
+
+    # Initialize a droplet list, with one copy of the initial droplet
+
+    droplets = [cp.deepcopy(initialDroplet)]
 
     # Initialize misc parameters
 
     dt = maxTime/nTimeSteps
     t = [0.]
-    smr = [droplet.radius]
+    smr = [initialDroplet.radius]
     nBreakups = 0
 
     # Open a file
@@ -100,24 +106,15 @@ def main():
 
     for stepNo in range(1, nTimeSteps + 1):
 
-        pass
+        for droplet in droplets:
+
+            droplet.advectPredictorCorrector(freestream, dt)
+
+        dropletInlet.addDrops(initialDroplet, droplets, dt)
 
     outFile.close()
 
-    print "\nTime-stepping complete."
-
-    print "\nThe final droplet:"
-    print "time =", str(t[-1]), "s"
-    print "number of breakups:", str(nBreakups)
-    print droplet
-
-    plot(t, smr, linewidth=2.0)
-    axis([0., t[-1], 0., 1.1*userInput["radius"]])
-    title('Droplet Sauter Mean Radius History')
-    xlabel('Time (s)')
-    ylabel('Sauter Mean Radius (SMR) (m)')
-    grid(True)
-    show()
+    plotDroplets(droplets)
 
 # Execute the main function
 

@@ -14,6 +14,8 @@ Author: Adam O'Brien
 """
 
 from math import sqrt, pi
+import copy as cp
+import random
 
 # Vector class for position/velocity
 
@@ -29,11 +31,15 @@ class Vector(object):
 
     def __add__(self, other):
 
-        return Vector(self.x + other.x, self.y + self.y)
+        return Vector(self.x + other.x, self.y + other.y)
 
     def __sub__(self, other):
 
         return Vector(self.x - other.x, self.y - other.y)
+
+    def __mul__(self, other):
+
+        return Vector(self.x*other, self.y*other)
 
     def mag(self):
         return sqrt(self.x**2 + self.y**2)
@@ -60,12 +66,13 @@ def dot(u, v):
 
 class Freestream(object):
 
-    def __init__(self, rho, mu, temperature, k, velocity):
+    def __init__(self, rho, mu, temperature, k, velocity, gravity):
         self.rho = rho
         self.mu = mu
         self.temperature = temperature
         self.k = k
         self.velocity = velocity
+        self.gravity = gravity
 
 # Droplet class for representing droplets
 
@@ -114,17 +121,52 @@ class Droplet(object):
 
         return sqrt(Ck*self.sigma/(self.rho*self.radius ** 3) - 1./td**2)
 
-    def advect(self, freestream, Cb, dt):
+    def Re(self, freestream):
 
-        vRel = self.velocity.rVector(freestream.velocity)
+        return freestream.rho*(freestream.velocity - self.velocity).mag()*2.*self.radius/freestream.mu
 
-        Fd = vRel.unitVector().scale(Cb*freestream.rho*dot(vRel, vRel)/2*self.area)
+    def dragCoefficient(self, freestream):
 
-        a = Fd.scale(1./self.mass)
+        # This drag coefficient for a sphere is based on the correlation of
+        # F.A. Morrison in "An Introduction to Fluid Mechanics"
 
-        self.position += self.velocity.scale(dt) + a.scale(dt**2/2)
+        Re = self.Re(freestream)
 
-        self.velocity += a.scale(dt)
+        return 24./Re + 2.6*(Re/5.)/(1. + (Re/5.)**1.52) + 0.411*(Re/263000.)**-7.94/(1. + (Re/263000.)**-8.) + (Re**0.8/461000.)
+
+    def dragForce(self, freestream):
+
+        Cd = self.dragCoefficient(freestream)
+
+        vRel = freestream.velocity - self.velocity
+
+        return vRel.unitVector()*0.5*freestream.rho*dot(vRel, vRel)*Cd*self.area
+
+    def acceleration(self, freestream):
+
+        return self.dragForce(freestream).scale(1./self.mass) + freestream.gravity
+
+    def advectEuler(self, freestream, dt):
+
+        a = self.acceleration(freestream)
+
+        self.position += self.velocity*dt + a*0.5*dt**2
+        self.velocity += a*dt
+
+    def advectPredictorCorrector(self, freestream, dt):
+
+        originalPosition = self.position
+
+        a = self.acceleration(freestream)
+        f1 = self.velocity + a*0.5*dt
+
+        self.position += f1*dt
+
+        a = self.acceleration(freestream)
+        f2 = self.velocity + a*0.5*dt
+
+        self.position = originalPosition + (f1 + f2)*0.5*dt
+        self.velocity += a*dt
 
     def checkBreakup(self):
 
@@ -132,9 +174,9 @@ class Droplet(object):
             return True
         else:
             return False
-            
+
     def printAll(self):
-        
+
         print "Radius:", self.radius
         print "Rho:", self.rho
         print "mu:", self.mu
@@ -145,3 +187,35 @@ class Droplet(object):
         print "k:", self.k
         print "Position:", self.position
         print "Velocity:", self.velocity
+
+class DropletInlet(object):
+
+    def __init__(self, newDropletFrequency, inletWidth, velocityDeviation):
+
+        self.newDropletFrequency = newDropletFrequency
+        self.inletWidth = inletWidth
+        self.velocityDeviation = velocityDeviation
+        self.timeSinceLastDroplet = 0.
+        self.newDropletPeriod = 1./self.newDropletFrequency
+        self.dropsAdded = 0
+
+    def addDrops(self, initialDroplet, droplets, dt):
+
+        self.timeSinceLastDroplet += dt
+
+        nDropsToAdd = int(self.timeSinceLastDroplet/self.newDropletPeriod)
+        self.timeSinceLastDroplet -= float(nDropsToAdd)*self.newDropletPeriod
+
+        if nDropsToAdd > 0:
+            self.dropsAdded += nDropsToAdd
+            print "Drops added:", self.dropsAdded
+
+        for i in range(0, nDropsToAdd):
+
+            droplets.append(cp.deepcopy(initialDroplet))
+            droplets[-1].position.x += random.uniform(-0.5*self.inletWidth, 0.5*self.inletWidth)
+            droplets[-1].velocity.x += random.normalvariate(0., self.velocityDeviation.x)
+            droplets[-1].velocity.y += random.normalvariate(0., self.velocityDeviation.y)
+
+
+

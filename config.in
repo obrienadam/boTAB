@@ -13,9 +13,10 @@ freestreamRho = 1.205
 freestreamMu = 18.27e-6
 temperature = 298.
 freestreamK = 0.024
-freestreamVelocity = 200., 0.
+freestreamVelocity = 20., 0.
+freestreamGravity = 0., 0.
 
-# Droplet
+# Original droplet parameters
 radius = 5.e-4
 dropletRho = 998.
 dropletMu = 8.94e-4
@@ -25,10 +26,14 @@ latentHeat = 334.
 specificHeat = 4.183
 dropletK = 0.58
 dropletPosition = 0., 0.
-dropletVelocity = 0., 20.
-nDroplets = 10
+dropletVelocity = 0., 10.
+
+# Inlet
+newDropletFrequency = 1000
+inletWidth = 0.01
+velocityDeviation = 0., 0.5
 
 # Simulation parameters
-maxTime = 0.1
-nTimeSteps = 5000
+maxTime = 0.8
+nTimeSteps = 500
 
