@@ -11,26 +11,14 @@ This solver uses the popular TAB model to simulate the atomization of droplets
 Author: Adam O'Brien
 
 """
+
 from input import *
 from math import exp, cos, sin, sqrt
 from fluid import *
 from evaporation import *
+from TAB import *
 from output import *
 import copy as cp
-
-# Returns the axis distortion y^n+1
-
-def computeY(Wec, dt, td, t, omega, yn, dydtn):
-
-    return Wec + exp(-dt/td)*((yn - Wec)*cos(omega*t) + 1/omega*(dydtn + \
-    (yn - Wec)/td)*sin(omega*t))
-
-# Returns the time rate of change of axis distortion (dy/dt)^n+1
-
-def computeDyDt(Wec, dt, td, t, omega, yn1, yn, dydtn):
-
-    return (Wec - yn1)/td + omega*exp(-dt/td)*(1/omega*(dydtn + (yn - Wec)/td)* \
-    cos(omega*t) - (yn - Wec)*sin(omega*t))
 
 def main():
 
@@ -57,6 +45,7 @@ def main():
     freestream = Freestream(userInput["freestreamRho"],       # density
                             userInput["freestreamMu"],        # viscosity
                             userInput["temperature"],         # temperature
+                            userInput["specificHeat"],        # specific heat
                             userInput["freestreamK"],         # thermal conductivity
                             userInput["freestreamVelocity"],  # velocity
                             userInput["freestreamGravity"])   # gravity
@@ -92,8 +81,6 @@ def main():
 
     dt = maxTime/nTimeSteps
     t = [0.]
-    smr = [initialDroplet.radius]
-    nBreakups = 0
 
     # Open a file
 
@@ -104,15 +91,27 @@ def main():
 
     print "\nBeginning time-stepping..."
 
+    ###########################################################################
+    #                                                                         #
+    #                        Main Iteration Loop                              #
+    #                                                                         #
+    ###########################################################################
+
     for stepNo in range(1, nTimeSteps + 1):
 
         for droplet in droplets:
 
             droplet.advectPredictorCorrector(freestream, dt)
 
+        evaporate(freestream, droplets, dt)
+        breakupTAB(freestream, droplets, dt)
+
         dropletInlet.addDrops(initialDroplet, droplets, dt)
+        t.append(t[-1] + dt)
 
     outFile.close()
+
+    print "\nTime-stepping complete. Finalizing output..."
 
     plotDroplets(droplets)
 

@@ -15,13 +15,15 @@ import matplotlib.pyplot as plt
 
 def plotDroplets(droplets):
 
-    xcoords = []
-    ycoords = []
+    xcoords = [droplet.position.x for droplet in droplets]
+    ycoords = [droplet.position.y for droplet in droplets]
+    radii = [100000.*droplet.radius for droplet in droplets]
 
-    for droplet in droplets:
+    plt.axis('equal')
+    plt.grid(True)
+    plt.title('Droplet Distribution', fontsize=20)
+    plt.xlabel('x (m)', fontsize=16)
+    plt.ylabel('y (m)', fontsize=16)
 
-        xcoords.append(droplet.position.x)
-        ycoords.append(droplet.position.y)
-
-    plt.plot(xcoords, ycoords, 'o')
+    plt.scatter(xcoords, ycoords, s=radii, alpha=0.5)
     plt.show()
