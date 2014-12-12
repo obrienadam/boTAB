@@ -31,42 +31,26 @@ def main():
 
     userInput = readInputFile()
 
-    # Set-up the constants in accordance with the input
+    # Initialize TAB coefficients
 
-    Cb = userInput["Cb"]
-    Ck = userInput["Ck"]
-    Cd = userInput["Ck"]
-    Cf = userInput["Cf"]
-    K = userInput["K"]
-    Cv = userInput["Cv"]
+    tabCoeffs = TabCoeffs()
 
     # Set-up the freestream
 
-    freestream = Freestream(userInput["freestreamRho"],       # density
-                            userInput["freestreamMu"],        # viscosity
-                            userInput["temperature"],         # temperature
-                            userInput["specificHeat"],        # specific heat
-                            userInput["freestreamK"],         # thermal conductivity
-                            userInput["freestreamVelocity"],  # velocity
-                            userInput["freestreamGravity"])   # gravity
+    freestream = Freestream(userInput["freestreamVelocity"], 
+                            userInput["freestreamGravity"])
+    
     # Set-up droplet initial conditions
 
-    initialDroplet = Droplet(userInput["radius"],    # radius
-                      userInput["dropletRho"],       # density
-                      userInput["dropletMu"],        # viscosity
-                      userInput["sigma"],            # surface tension coefficient
-                      userInput["boilingTemp"],      # boiling temperature
-                      userInput["latentHeat"],       # latent heat of evaporation
-                      userInput["specificHeat"],     # specific heat
-                      userInput["dropletK"],         # thermal conductivity
-                      userInput["dropletPosition"],  # position
-                      userInput["dropletVelocity"])  # velocity
+    initialDroplet = Droplet(userInput["dropletRadius"],
+                             userInput["dropletPosition"],
+                             userInput["dropletVelocity"])
 
     # Set-up the droplet inlet
 
-    dropletInlet = DropletInlet(userInput["newDropletFrequency"],
+    dropletInlet = DropletInlet(userInput["inletDropletCreationFrequency"],
                                 userInput["inletWidth"],
-                                userInput["velocityDeviation"])
+                                userInput["inletVelocityDeviation"])
 
     # Set-up the simulation parameters in accordance with the input
 
@@ -104,7 +88,7 @@ def main():
             droplet.advectPredictorCorrector(freestream, dt)
 
         evaporate(freestream, droplets, dt)
-        breakupTAB(freestream, droplets, dt)
+        breakupTab(freestream, droplets, dt)
 
         dropletInlet.addDrops(initialDroplet, droplets, dt)
         t.append(t[-1] + dt)

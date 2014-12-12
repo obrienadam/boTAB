@@ -1,6 +1,6 @@
 ## This is the input file for boTAB
 
-# Empirical constants
+# Empirical constants for the TAB model
 Cb = 0.5
 Ck = 8.
 Cd = 5.
@@ -8,31 +8,31 @@ Cf = 1./3.
 K = 10./3.
 Cv = 1.
 
-# Freestream
+# Freestream properties
 freestreamRho = 1.205
 freestreamMu = 18.27e-6
-temperature = 298.
-specificHeat = 1.401
+freestreamTambient = 298.
+freestreamCp = 1.401
 freestreamK = 0.024
-freestreamVelocity = 30., 0.
+freestreamVelocity = 50., 0.
 freestreamGravity = 0., 0.
 
-# Original droplet parameters
-radius = 5.e-4
+# Initial droplet properties
+dropletRadius = 5.e-4
 dropletRho = 998.
 dropletMu = 8.94e-4
-sigma = 0.07262
-boilingTemp = 373.
-latentHeat = 334.
-specificHeat = 4.183
+dropletSigma = 0.07262
+dropletTboil = 373.
+dropletL = 2257.
+dropletCp = 4.183
 dropletK = 0.58
 dropletPosition = 0., 0.
 dropletVelocity = 0., 10.
 
-# Inlet
-newDropletFrequency = 4000
+# Inlet parameters
+inletDropletCreationFrequency = 8000
 inletWidth = 0.01
-velocityDeviation = 0., 0.5
+inletVelocityDeviation = 0., 0.5
 
 # Simulation parameters
 maxTime = 0.1

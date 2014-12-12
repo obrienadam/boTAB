@@ -66,39 +66,55 @@ def dot(u, v):
 
 class Freestream(object):
 
-    def __init__(self, rho, mu, temperature, specificHeat, k, velocity, gravity):
+    def __init__(self, velocity, gravity):
 
-        self.rho = rho
-        self.mu = mu
-        self.temperature = temperature
-        self.specificHeat = specificHeat
-        self.k = k
+        # constructed properties
+
         self.velocity = velocity
         self.gravity = gravity
-        self.Pr = self.specificHeat*self.mu/self.k
+        
+        # default air proplerties (can be changed)
+
+        self.rho = 1.205
+        self.mu = 18.27e-6
+        self.Tambient = 298.
+        self.Cp = 1.0005
+        self.k = 0.0257
+        self.Pr = self.Cp*self.mu/self.k
 
 # Droplet class for representing droplets
 
 class Droplet(object):
 
-    def __init__(self, radius, rho, mu, sigma, boilingTemp, latentHeat, specificHeat, k, position, velocity):
+    def __init__(self, radius, position, velocity):
+        
+        # constructed properties
+
         self.radius = radius
-        self.rho = rho
-        self.mu = mu
-        self.sigma = sigma
-        self.boilingTemp = boilingTemp
-        self.latentHeat = latentHeat
-        self.specificHeat = specificHeat
-        self.k = k
         self.position = position
         self.velocity = velocity
-        self.mass = self.rho*(4./3.)*pi*self.radius**3
+
+        # default water properties (can be changed)
+
+        self.rho = 998.
+        self.mu = 8.94e-4        
+        self.sigma = 0.07262
+        self.Tboil = 373.
+        self.L = 2257.
+        self.Cp = 4.183
+        self.k = 0.58
+        
+        # computed quantities
+
+        self.diameter = 2.*self.radius        
+        self.volume = (4./3.)*pi*self.radius**3
         self.area = pi*self.radius**2
-        self.volume = self.mass/self.rho
-        self.diameter = 2.*self.radius
+        self.mass = self.rho*self.volume
+
+        # TAB properties
+
         self.y = 0.
         self.dydt = 0.
-        self.t = 0.
 
     def __repr__(self):
 
