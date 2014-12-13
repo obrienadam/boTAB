@@ -31,15 +31,11 @@ def main():
 
     userInput = readInputFile()
 
-    # Initialize TAB coefficients
-
-    tabCoeffs = TabCoeffs()
-
     # Set-up the freestream
 
-    freestream = Freestream(userInput["freestreamVelocity"], 
+    freestream = Freestream(userInput["freestreamVelocity"],
                             userInput["freestreamGravity"])
-    
+
     # Set-up droplet initial conditions
 
     initialDroplet = Droplet(userInput["dropletRadius"],

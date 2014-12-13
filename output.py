@@ -12,12 +12,13 @@ Author: Adam O'Brien
 """
 
 import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 
 def plotDroplets(droplets):
 
     xcoords = [droplet.position.x for droplet in droplets]
     ycoords = [droplet.position.y for droplet in droplets]
-    radii = [100000.*droplet.radius for droplet in droplets]
+    radii = [50000.*droplet.radius for droplet in droplets]
 
     plt.axis('equal')
     plt.grid(True)
@@ -26,4 +27,5 @@ def plotDroplets(droplets):
     plt.ylabel('y (m)', fontsize=16)
 
     plt.scatter(xcoords, ycoords, s=radii, alpha=0.5)
+
     plt.show()

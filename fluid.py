@@ -13,7 +13,7 @@ Author: Adam O'Brien
 
 """
 
-from math import sqrt, pi
+from math import sqrt, pi, exp
 import copy as cp
 import random
 
@@ -72,22 +72,27 @@ class Freestream(object):
 
         self.velocity = velocity
         self.gravity = gravity
-        
+
         # default air proplerties (can be changed)
 
-        self.rho = 1.205
         self.mu = 18.27e-6
-        self.Tambient = 298.
+        self.Pambient = 101325.
+        self.Tambient = 800.
         self.Cp = 1.0005
         self.k = 0.0257
+        self.M = 28.97
         self.Pr = self.Cp*self.mu/self.k
+
+        # Computed properties
+
+        self.rho = self.Pambient/(286.9*self.Tambient)
 
 # Droplet class for representing droplets
 
 class Droplet(object):
 
     def __init__(self, radius, position, velocity):
-        
+
         # constructed properties
 
         self.radius = radius
@@ -97,19 +102,15 @@ class Droplet(object):
         # default water properties (can be changed)
 
         self.rho = 998.
-        self.mu = 8.94e-4        
+        self.mu = 8.94e-4
         self.sigma = 0.07262
         self.Tboil = 373.
+        self.Tcrit = 647.096
+        self.T = 400.
         self.L = 2257.
         self.Cp = 4.183
         self.k = 0.58
-        
-        # computed quantities
-
-        self.diameter = 2.*self.radius        
-        self.volume = (4./3.)*pi*self.radius**3
-        self.area = pi*self.radius**2
-        self.mass = self.rho*self.volume
+        self.M = 18.01528
 
         # TAB properties
 
@@ -121,29 +122,48 @@ class Droplet(object):
         return "Radius: %s\nPosition: %s\nVelocity: %s"%(str(self.radius), \
         self.position, self.velocity)
 
-    def weberNo(self, freestream):
+    def diameter(self):
+
+        return 2.*self.radius
+
+    def volume(self):
+
+        return (4./3.)*pi*self.radius**3
+
+    def area(self):
+
+        return pi*self.radius**2
+
+    def mass(self):
+
+        return self.volume()*self.rho
+
+    def Pvap(self, freestream):
+
+        Tref = (2./3.)*self.T + (1./3.)*freestream.Tambient
+
+        a1 = -7.85951783
+        a2 = 1.84408259
+        a3 = -11.7866497
+        a4 = 22.6807411
+        a5 = -15.9618719
+        a6 = 1.80122502
+
+        tau = 1. - Tref/self.Tcrit
+
+        pOverPc = exp((a1*tau + a2*tau**1.5 + a3*tau**3 + a4*tau**3.5 + a5*tau**4 + a6*tau**7.5)*self.Tcrit/self.T)
+
+        return pOverPc*22064.
+
+    def We(self, freestream):
 
         vRel = self.velocity.rVector(freestream.velocity)
 
         return freestream.rho*dot(vRel, vRel)*self.radius/self.sigma
 
-    def weberNoCrit(self, freestream, Cf, Ck, Cb):
-
-        return Cf/(Ck*Cb)*self.weberNo(freestream)
-
-    def td(self, Cd):
-
-        return 2.*self.rho*self.radius ** 2/(Cd*self.mu)
-
-    def omega(self, Cd, Ck):
-
-        td = self.td(Cd)
-
-        return sqrt(Ck*self.sigma/(self.rho*self.radius ** 3) - 1./td**2)
-
     def Re(self, freestream):
 
-        return freestream.rho*(freestream.velocity - self.velocity).mag()*2.*self.radius/freestream.mu
+        return freestream.rho*(freestream.velocity - self.velocity).mag()*self.diameter()/freestream.mu
 
     def dragCoefficient(self, freestream):
 
@@ -160,11 +180,11 @@ class Droplet(object):
 
         vRel = freestream.velocity - self.velocity
 
-        return vRel.unitVector()*0.5*freestream.rho*dot(vRel, vRel)*Cd*self.area
+        return vRel.unitVector()*0.5*freestream.rho*dot(vRel, vRel)*Cd*self.area()
 
     def acceleration(self, freestream):
 
-        return self.dragForce(freestream).scale(1./self.mass) + freestream.gravity
+        return self.dragForce(freestream).scale(1./self.mass()) + freestream.gravity
 
     def advectEuler(self, freestream, dt):
 
@@ -187,13 +207,6 @@ class Droplet(object):
 
         self.position = originalPosition + (f1 + f2)*0.5*dt
         self.velocity += a*dt
-
-    def checkBreakup(self):
-
-        if self.y > 1.:
-            return True
-        else:
-            return False
 
     def printAll(self):
 
@@ -228,7 +241,6 @@ class DropletInlet(object):
 
         if nDropsToAdd > 0:
             self.dropsAdded += nDropsToAdd
-            print "Drops added:", self.dropsAdded
 
         for i in range(0, nDropsToAdd):
 
