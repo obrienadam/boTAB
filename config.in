@@ -14,7 +14,7 @@ freestreamMu = 18.27e-6
 freestreamTambient = 298.
 freestreamCp = 1.401
 freestreamK = 0.024
-freestreamVelocity = 35., 0.
+freestreamVelocity = 55., 0.
 freestreamGravity = 0., 0.
 freeStreamM = 28.97
 
@@ -32,11 +32,11 @@ dropletVelocity = 0., 10.
 dropletM = 18.01528
 
 # Inlet parameters
-inletDropletCreationFrequency = 3000
-inletWidth = 0.1
-inletVelocityDeviation = 0., 0.5
+inletDropletCreationFrequency = 10000
+inletWidth = 0.01
+inletVelocityDeviation = 0., 2.
 
 # Simulation parameters
-maxTime = 1.
+maxTime = 0.05
 nTimeSteps = 2000
 

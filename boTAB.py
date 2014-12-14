@@ -25,7 +25,7 @@ def main():
     print ""
     print "boTAB |"
     print "-------"
-    print "        Compute the break-up of a drop in a uniform flow", "\n"
+    print "        Compute the break-up of a drop in a uniform cross-flow", "\n"
 
     # Open up a configuration file
 
@@ -61,11 +61,7 @@ def main():
 
     dt = maxTime/nTimeSteps
     t = [0.]
-
-    # Open a file
-
-    outFile = open("dropBreakup.txt", "w")
-    outFile.write("time, droplet_radius, position, velocity\n")
+    nChildDroplets = 0
 
     # Begin the simulation
 
@@ -84,11 +80,11 @@ def main():
             droplet.advectPredictorCorrector(freestream, dt)
 
         evaporate(freestream, droplets, dt)
-        breakupTab(freestream, droplets, dt)
+        nChildDroplets += breakupTab(freestream, droplets, dt)
 
         dropletInlet.addDrops(initialDroplet, droplets, dt)
         t.append(t[-1] + dt)
-        
+                        
         if stepNo%(nTimeSteps/20) == 0:
 
             completionPercentage = float(stepNo)/float(nTimeSteps)*100.
@@ -98,8 +94,7 @@ def main():
             print "Number of droplets in domain :", len(droplets)
             print "Simulation time elapsed      : %s seconds"%(t[-1])
             print "Simulation time remaining    : %s seconds"%(maxTime - t[-1])
-
-    outFile.close()
+            print "Number of child drops        :", nChildDroplets
 
     print "\nTime-stepping complete. Finalizing output..."
 
