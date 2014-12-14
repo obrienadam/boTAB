@@ -88,6 +88,16 @@ def main():
 
         dropletInlet.addDrops(initialDroplet, droplets, dt)
         t.append(t[-1] + dt)
+        
+        if stepNo%(nTimeSteps/20) == 0:
+
+            completionPercentage = float(stepNo)/float(nTimeSteps)*100.
+            
+            print "-----------------------------------------------------------"
+            print "Time-stepping completion     : %s%%"%(completionPercentage)
+            print "Number of droplets in domain :", len(droplets)
+            print "Simulation time elapsed      : %s seconds"%(t[-1])
+            print "Simulation time remaining    : %s seconds"%(maxTime - t[-1])
 
     outFile.close()
 

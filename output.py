@@ -22,7 +22,6 @@ def plotDroplets(droplets):
 
     plt.axis('equal')
     plt.grid(True)
-    plt.title('Droplet Distribution', fontsize=20)
     plt.xlabel('x (m)', fontsize=16)
     plt.ylabel('y (m)', fontsize=16)
 
