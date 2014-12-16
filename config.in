@@ -14,9 +14,9 @@ freestreamMu = 18.27e-6
 freestreamTambient = 298.
 freestreamCp = 1.401
 freestreamK = 0.024
-freestreamVelocity = 55., 0.
+freestreamVelocity = 45., 0.
 freestreamGravity = 0., 0.
-freeStreamM = 28.97
+freestreamM = 28.97
 
 # Initial droplet properties
 dropletRadius = 5.e-4

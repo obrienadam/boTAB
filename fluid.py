@@ -66,7 +66,7 @@ def dot(u, v):
 
 class Freestream(object):
 
-    def __init__(self, velocity, gravity):
+    def __init__(self, velocity = Vector(40., 0.), gravity = Vector(0., 0.)):
 
         # constructed properties
 
@@ -91,7 +91,7 @@ class Freestream(object):
 
 class Droplet(object):
 
-    def __init__(self, radius, position, velocity):
+    def __init__(self, radius = 5e-4, position = Vector(0., 0.), velocity = Vector(0., 10.)):
 
         # constructed properties
 
@@ -223,7 +223,7 @@ class Droplet(object):
 
 class DropletInlet(object):
 
-    def __init__(self, newDropletFrequency, inletWidth, velocityDeviation):
+    def __init__(self, newDropletFrequency = 1000, inletWidth = 0.005, velocityDeviation = 0.):
 
         self.newDropletFrequency = newDropletFrequency
         self.inletWidth = inletWidth

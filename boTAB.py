@@ -31,22 +31,13 @@ def main():
 
     userInput = readInputFile()
 
-    # Set-up the freestream
+    freestream = Freestream()
+    initialDroplet = Droplet()
+    dropletInlet = DropletInlet()
 
-    freestream = Freestream(userInput["freestreamVelocity"],
-                            userInput["freestreamGravity"])
+    # Set object parameters from the input file
 
-    # Set-up droplet initial conditions
-
-    initialDroplet = Droplet(userInput["dropletRadius"],
-                             userInput["dropletPosition"],
-                             userInput["dropletVelocity"])
-
-    # Set-up the droplet inlet
-
-    dropletInlet = DropletInlet(userInput["inletDropletCreationFrequency"],
-                                userInput["inletWidth"],
-                                userInput["inletVelocityDeviation"])
+    setObjectParametersFromInput(userInput, freestream, initialDroplet, dropletInlet)
 
     # Set-up the simulation parameters in accordance with the input
 
@@ -84,11 +75,11 @@ def main():
 
         dropletInlet.addDrops(initialDroplet, droplets, dt)
         t.append(t[-1] + dt)
-                        
+
         if stepNo%(nTimeSteps/20) == 0:
 
             completionPercentage = float(stepNo)/float(nTimeSteps)*100.
-            
+
             print "-----------------------------------------------------------"
             print "Time-stepping completion     : %s%%"%(completionPercentage)
             print "Number of droplets in domain :", len(droplets)
