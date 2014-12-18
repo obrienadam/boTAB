@@ -62,37 +62,39 @@ def breakupTab(freestream, droplets, dt):
             volOfNewDrops = 0.
 
             while True:
-                
+
                 newRadius = np.random.normal(rSmr, 0.2*rSmr)
-                
+
                 if newRadius < 0.:
-                    
+
                     continue
-                
-                randomNo = np.random.uniform(-1, 1)                
-                
-                newVelocity = droplet.velocity + droplet.velocity.normalVector().unitVector()*Cb*droplet.radius*droplet.dydt*(randomNo/fabs(randomNo))                
-                
-                newDroplet = Droplet(newRadius, cp.copy(droplet.position), cp.copy(newVelocity))
-                
+
+                randomNo = np.random.uniform(-1, 1)
+
+                newVelocity = droplet.velocity + droplet.velocity.normalVector().unitVector()*Cb*droplet.radius*droplet.dydt*(randomNo/fabs(randomNo))
+
+                newDroplet = cp.deepcopy(droplet);
+                newDroplet.radius = newRadius
+                newDroplet.velocity = cp.copy(newVelocity)
+
                 newDroplets.append(newDroplet)
-                
+
                 volOfNewDrops += newDroplets[-1].volume()
-                
+
                 if volOfNewDrops >= droplet.volume():
-                    
+
                     break
-                
+
     # Remove the old parent droplets
-                
+
     droplets[:] = [droplet for droplet in droplets if droplet.y < 1.]
-    
+
     # Add the newly created child droplets
-    
+
     for droplet in newDroplets:
-        
+
         droplets.append(cp.deepcopy(droplet))
-        
+
     # Return the number of droplets created
-        
+
     return len(newDroplets)
